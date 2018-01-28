@@ -1,0 +1,48 @@
+--- nipal	2018-01-28 17:32:53.474986169 +0900
++++ nipal.new	2018-01-28 17:33:00.024986105 +0900
+@@ -47,7 +47,7 @@
+       kill $PID
+       timeout=0
+       while [ $timeout -lt 10 ]; do
+-         if ps axw -o pid | grep -w $PID > /dev/null; then
++         if ps axw -o pid | grep -w $PID ; then
+             sleep 1
+          else
+             break
+@@ -59,17 +59,10 @@
+ 
+ start() {
+    if ! status ; then
+-      if [ ! -f $modulePath/nipalk.ko ]; then
+-         echo "error: $modulePath/nipalk.ko not found"
+-         echo "error: Please compile and install nipalk.ko by running"
+-         echo "error:  updateNIDrivers"
+-         return 1
+-      fi
+ 
+       if ! testKernelDriverLoaded nipalk; then
+-         /sbin/modprobe nipalk >/tmp/nipalk-load.log 2>&1
++         /sbin/modprobe -v nipalk
+          if ! testKernelDriverLoaded nipalk ; then
+-            cat /tmp/nipalk-load.log
+             echo " "
+             echo "error: nipalk failed to load"
+             echo "possible causes: "
+@@ -110,7 +103,7 @@
+       fi
+       cat $nipalPersistentDataFile > /dev/nipalk
+ 
+-      $nipalDir/bin/readInfFiles `find $nipalEtc/inf -iname \*.inf | sort` >/dev/null 2>&1
++      $nipalDir/bin/readInfFiles `find $nipalEtc/inf -iname \*.inf | sort` 
+ 
+       killInstancesOf nipalps
+       $nipalDir/bin/nipalps /dev/nipalk $nipalPersistentDataFile &
+@@ -119,7 +112,7 @@
+       do
+          for line in `cat $MOD`
+          do
+-            /sbin/modprobe $line
++            /sbin/modprobe -v $line
+          done
+       done
+ 
