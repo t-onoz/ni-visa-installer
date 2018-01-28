@@ -137,6 +137,10 @@
    MODULE_DESCRIPTION("National Instruments Kernel Abstraction Layer");
 #endif
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,10,0))
+#define GENL_ID_GENERATE 0
+#endif
+
 #define nNIKAL100_tWorkQueue struct work_struct
 #define nNIKAL100_mInitWorkQueue INIT_WORK
 #define nNIKAL100_mScheduleWorkQueue schedule_work
@@ -2018,13 +2022,6 @@ nNIKAL100_tBoolean nNIKAL200_isAddressableMemOver4G()
 
 #define NLNIKAL_CMD_SEND     1
 
-static struct genl_family nikal_netlink_family =
-{
-   .id = GENL_ID_GENERATE,
-   .name = "nlnikal",
-   .version = 1,
-   .maxattr = 1
-};
 
 static int nlnikal_msg(struct sk_buff *skb, struct genl_info *info) { return 0; }
 
@@ -2034,6 +2031,17 @@ static struct genl_ops nikal_netlink_ops[] =
       .cmd = NLNIKAL_CMD_SEND,
       .doit = nlnikal_msg
    },
+};
+
+static struct genl_family nikal_netlink_family =
+{
+   .id = GENL_ID_GENERATE,
+   .name = "nlnikal",
+   .version = 1,
+   .maxattr = 1,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,10,0))
+   .ops = nikal_netlink_ops
+#endif
 };
 
 
@@ -2057,7 +2065,9 @@ static int __init nNIKAL100_initDriver(void)
    kref_init(&(nNIKAL200_sPALPseudoDevice.kref));
    kref_init(&(nNIKAL200_sPALPseudoDeviceInterface.kref));
 
-#ifdef nNIKAL1400_kHasFamilyGenlOpsGroups
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,10,0))
+   if ((status = genl_register_family(&nikal_netlink_family))) return status;
+#elif nNIKAL1400_kHasFamilyGenlOpsGroups
    if ((status = genl_register_family_with_ops(&nikal_netlink_family, nikal_netlink_ops))) return status;
 #else
    if ((status = genl_register_family_with_ops(&nikal_netlink_family, nikal_netlink_ops, 1))) return status;

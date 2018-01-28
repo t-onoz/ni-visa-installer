@@ -2,8 +2,8 @@
 register() {
     touch /sbin/chkconfig
     chmod +x /sbin/chkconfig
-    patch -uNb /usr/local/natinst/nikal/src/nikal/nikal.c < ./nikal.c.patch
-    patch -uNb /usr/local/natinst/nipal/etc/init.d/nipal < ./nipal.patch
+    install -b -m644 ./nikal.c.new /usr/local/natinst/nikal/src/nikal/nikal.c
+    install -b -m644 ./nipal.new /usr/local/natinst/nipal/etc/init.d/nipal
     rm -rf /var/lib/nikal
     install -b -m644 ./menus/*.menu /etc/xdg/menus/applications-merged/
     install -b -m644 ./services/*.service /etc/systemd/system/
